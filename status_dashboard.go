@@ -44,12 +44,9 @@ type ImpactedService struct {
 }
 
 // ListStatusDashboardsResponse represents a list response of business services.
-type ImpactedServicesByStatusDashboardResponse struct {
-	Total    uint               `json:"total,omitempty"`
+type ImpactedServicesListResponse struct {
+	APIListObject
 	Services []*ImpactedService `json:"services,omitempty"`
-	Offset   uint               `json:"offset,omitempty"`
-	More     bool               `json:"more,omitempty"`
-	Limit    uint               `json:"limit,omitempty"`
 }
 
 // ListStatusDashboardServiceImpactsOptions is the data structure used when calling the ListStatusDashboards API endpoint.
@@ -83,7 +80,7 @@ func (c *Client) ImpactedServicesByStatusDashboardUrlSlug(ctx context.Context, u
 
 	response, err := c.get(ctx, fmt.Sprintf("/status_dashboards/url_slugs/%s/service_impacts?", url_slug)+queryParms.Encode(), nil)
 
-	var result ImpactedServicesByStatusDashboardResponse
+	var result ImpactedServicesListResponse
 	if err := c.decodeJSON(response, &result); err != nil {
 		return nil, err
 	}

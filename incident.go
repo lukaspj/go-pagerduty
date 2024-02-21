@@ -380,6 +380,23 @@ type CreateIncidentNoteResponse struct {
 	IncidentNote IncidentNote `json:"note"`
 }
 
+// ListIncidentImpacts lists impacted business services for this incident.
+func (c *Client) ListIncidentImpacts(ctx context.Context, id string) ([]*ImpactedService, error) {
+	resp, err := c.get(ctx, "/incidents/"+id+"/business_services/impacts", map[string]string{
+		"X-EARLY-ACCESS": "business-impact-early-access",
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var result ImpactedServicesListResponse
+	if err := c.decodeJSON(resp, &result); err != nil {
+		return nil, err
+	}
+
+	return result.Services, nil
+}
+
 // ListIncidentNotes lists existing notes for the specified incident.
 //
 // Deprecated: Use ListIncidentNotesWithContext instead.
