@@ -21,6 +21,11 @@ type BusinessService struct {
 	Team           *BusinessServiceTeam `json:"team,omitempty"`
 }
 
+type BusinessServiceImpactor struct {
+	ID   string `json:"id,omitempty"`
+	Type string `json:"type,omitempty"`
+}
+
 // BusinessServiceTeam represents a team object in a business service
 type BusinessServiceTeam struct {
 	ID   string `json:"id,omitempty"`
@@ -44,6 +49,34 @@ type ListBusinessServicesResponse struct {
 
 // ListBusinessServiceOptions is the data structure used when calling the ListBusinessServices API endpoint.
 type ListBusinessServiceOptions struct {
+	// Limit is the pagination parameter that limits the number of results per
+	// page. PagerDuty defaults this value to 25 if omitted, and sets an upper
+	// bound of 100.
+	Limit uint `url:"limit,omitempty"`
+
+	// Offset is the pagination parameter that specifies the offset at which to
+	// start pagination results. When trying to request the next page of
+	// results, the new Offset value should be currentOffset + Limit.
+	Offset uint `url:"offset,omitempty"`
+
+	// Total is the pagination parameter to request that the API return the
+	// total count of items in the response. If this field is omitted or set to
+	// false, the total number of results will not be sent back from the PagerDuty API.
+	//
+	// Setting this to true will slow down the API response times, and so it's
+	// recommended to omit it unless you've a specific reason for wanting the
+	// total count of items in the collection.
+	Total bool `url:"total,omitempty"`
+}
+
+// ListBusinessServiceImpactorsResponse represents a list response of business services.
+type ListBusinessServiceImpactorsResponse struct {
+	APIListObject
+	Impactors []*BusinessServiceImpactor `json:"impactors,omitempty"`
+}
+
+// ListBusinessServiceImpactorsOptions is the data structure used when calling the ListBusinessServices API endpoint.
+type ListBusinessServiceImpactorsOptions struct {
 	// Limit is the pagination parameter that limits the number of results per
 	// page. PagerDuty defaults this value to 25 if omitted, and sets an upper
 	// bound of 100.
@@ -114,6 +147,29 @@ func (c *Client) ListBusinessServicesPaginated(ctx context.Context, o ListBusine
 	}
 
 	return businessServices, nil
+}
+
+// ListBusinessServiceImpactors lists business service impactors, automatically
+// handling pagination and returning the full collection.
+func (c *Client) ListBusinessServiceImpactors(ctx context.Context, o ListBusinessServiceImpactorsOptions) (*ListBusinessServiceImpactorsResponse, error) {
+	queryParms, err := query.Values(o)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := c.get(ctx, "/business_services/impactors?"+queryParms.Encode(), map[string]string{
+		"X-EARLY-ACCESS": "business-impact-early-access",
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var result ListBusinessServiceImpactorsResponse
+	if err := c.decodeJSON(response, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }
 
 // CreateBusinessService creates a new business service.
