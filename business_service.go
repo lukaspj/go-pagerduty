@@ -96,7 +96,7 @@ type ListBusinessServiceImpactorsOptions struct {
 	// total count of items in the collection.
 	Total bool `url:"total,omitempty"`
 
-	IDs []string `url:"ids,omitempty"`
+	IDs []string `url:"ids[],omitempty"`
 }
 
 // ListBusinessServices lists existing business services. This method currently
